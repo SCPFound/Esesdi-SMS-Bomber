@@ -1,0 +1,15 @@
+requests
+random
+string
+colorama
+
+customtkinter
+os
+time
+threading
+time
+hashlib
+sms
+tkinter
+
+# BUNLAR INDIRILECEK PIP INSTALL ILE!
