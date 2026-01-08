@@ -7,6 +7,10 @@ Codza SMS Kaynak kodları kullanılmıştır. Panel tasarımı tamamen bana aitt
 
 Kullanım: Lisansı girin ve boş alanları doldurun işte sadece turbo çalışıyo onun içinde sadece tel no lazım.
 
+reqs.txt içindeki dosyaları indirin
+
+**pip install -r reqs.txt**
+
 EN
 
 Installation: Download the requirements.txt file.
