@@ -39,13 +39,12 @@ def check_license(user_key):
         valid_hashes = [x.strip() for x in r.text.splitlines() if x.strip()]
 
         if user_hash in valid_hashes:
-            save_cache(user_hash)  # cache yaz
+            save_cache(user_hash)
             return True
 
     except:
-        pass  # offline'a düş
+        pass 
 
-    # 2️⃣ OFFLINE CACHE
     cached = load_cache()
     if cached == user_hash:
         return True
