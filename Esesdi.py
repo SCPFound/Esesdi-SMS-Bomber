@@ -6,50 +6,25 @@ import hashlib
 from sms import SendSms
 from tkinter import messagebox
 
-import requests
-import hashlib
-import os
-from tkinter import messagebox
-
+# ================= LİSANS =================
 PASTEBIN_RAW_URL = "https://pastebin.com/raw/pZLSpNpu"
-CACHE_FILE = "license.cache"
 
 def sha256(text):
     return hashlib.sha256(text.encode()).hexdigest()
 
-def save_cache(license_hash):
-    with open(CACHE_FILE, "w") as f:
-        f.write(license_hash)
-
-def load_cache():
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, "r") as f:
-            return f.read().strip()
-    return None
-
-def check_license(user_key):
-    user_hash = sha256(user_key)
-
-    # 1️⃣ ONLINE KONTROL
+def check_license_online(user_key):
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
-        r = requests.get(PASTEBIN_RAW_URL, headers=headers, timeout=7)
+        r = requests.get(PASTEBIN_RAW_URL, headers=headers, timeout=10)
         r.raise_for_status()
 
         valid_hashes = [x.strip() for x in r.text.splitlines() if x.strip()]
-
-        if user_hash in valid_hashes:
-            save_cache(user_hash)
-            return True
+        return sha256(user_key) in valid_hashes
 
     except:
-        pass 
+        messagebox.showerror("Hata", "Lisans sunucusuna bağlanılamadı!")
+        return False
 
-    cached = load_cache()
-    if cached == user_hash:
-        return True
-
-    return False
 
 def license_window():
     lic = ctk.CTk()
@@ -76,14 +51,11 @@ def license_window():
             messagebox.showerror("Hata", "Lisans boş olamaz")
             return
 
-        if check_license(key):
+        if check_license_online(key):
             lic.destroy()
             app.deiconify()
         else:
-            messagebox.showerror(
-                "Hata",
-                "Geçersiz lisans veya internet yok!"
-            )
+            messagebox.showerror("Hata", "Geçersiz Lisans")
 
     ctk.CTkButton(
         lic,
@@ -92,7 +64,6 @@ def license_window():
     ).pack(pady=20)
 
     lic.mainloop()
-
 
 # ================= PANEL =================
 ctk.set_appearance_mode("dark")
