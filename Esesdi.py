@@ -1,22 +1,56 @@
 import customtkinter as ctk
-import os as system
 import time
 import threading
-import time
+import requests
 import hashlib
-
-from colorama import Fore
 from sms import SendSms
 from tkinter import messagebox
 
-# ---- LİSANS ----
-LICENSE_HASH = hashlib.sha256(
-    "ESESDI-ASD2-ASDN-23VA".encode() and "ESESDI-2DA2-BOWC-MB74".encode() and "test".encode()
-).hexdigest()
+import requests
+import hashlib
+import os
+from tkinter import messagebox
 
-def check_license(key):
-    return hashlib.sha256(key.encode()).hexdigest() == LICENSE_HASH
+PASTEBIN_RAW_URL = "https://pastebin.com/raw/pZLSpNpu"
+CACHE_FILE = "license.cache"
 
+def sha256(text):
+    return hashlib.sha256(text.encode()).hexdigest()
+
+def save_cache(license_hash):
+    with open(CACHE_FILE, "w") as f:
+        f.write(license_hash)
+
+def load_cache():
+    if os.path.exists(CACHE_FILE):
+        with open(CACHE_FILE, "r") as f:
+            return f.read().strip()
+    return None
+
+def check_license(user_key):
+    user_hash = sha256(user_key)
+
+    # 1️⃣ ONLINE KONTROL
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get(PASTEBIN_RAW_URL, headers=headers, timeout=7)
+        r.raise_for_status()
+
+        valid_hashes = [x.strip() for x in r.text.splitlines() if x.strip()]
+
+        if user_hash in valid_hashes:
+            save_cache(user_hash)  # cache yaz
+            return True
+
+    except:
+        pass  # offline'a düş
+
+    # 2️⃣ OFFLINE CACHE
+    cached = load_cache()
+    if cached == user_hash:
+        return True
+
+    return False
 
 def license_window():
     lic = ctk.CTk()
@@ -24,12 +58,11 @@ def license_window():
     lic.geometry("360x220")
     lic.resizable(False, False)
 
-    label = ctk.CTkLabel(
+    ctk.CTkLabel(
         lic,
         text="Lisans Anahtarı Gir",
         font=("Arial", 18, "bold")
-    )
-    label.pack(pady=20)
+    ).pack(pady=20)
 
     entry = ctk.CTkEntry(
         lic,
@@ -39,62 +72,56 @@ def license_window():
     entry.pack(pady=10)
 
     def submit():
-        if check_license(entry.get().strip()):
-            lic.destroy()
-            app.deiconify()  # ana pencereyi aç
-        else:
-            messagebox.showerror("Hata", "Geçersiz Lisans Anahtarı")
+        key = entry.get().strip()
+        if not key:
+            messagebox.showerror("Hata", "Lisans boş olamaz")
+            return
 
-    btn = ctk.CTkButton(
+        if check_license(key):
+            lic.destroy()
+            app.deiconify()
+        else:
+            messagebox.showerror(
+                "Hata",
+                "Geçersiz lisans veya internet yok!"
+            )
+
+    ctk.CTkButton(
         lic,
-        text="GİRİŞ",
+        text="DOĞRULA",
         command=submit
-    )
-    btn.pack(pady=20)
+    ).pack(pady=20)
 
     lic.mainloop()
 
 
-def sleep(x):
-    time.sleep(x)
-
+# ================= PANEL =================
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 app = ctk.CTk()
+app.withdraw()
 app.title("SMS Paneli")
 app.geometry("420x520")
 app.resizable(False, False)
 
-servisler_sms = []
-for attribute in dir(SendSms):
-    attribute_value = getattr(SendSms, attribute)
-    if callable(attribute_value):
-        if attribute.startswith('__') == False:
-            servisler_sms.append(attribute)
+servisler_sms = [
+    x for x in dir(SendSms)
+    if callable(getattr(SendSms, x)) and not x.startswith("__")
+]
 
-# ---------- BAŞLIK ----------
-title = ctk.CTkLabel(
+ctk.CTkLabel(
     app,
     text="DIRECTED BY ESESDI!",
     font=("Arial", 22, "bold")
-)
-title.pack(pady=15)
+).pack(pady=15)
 
-# ---------- INPUTLAR ----------
-tel_entry = ctk.CTkEntry(app, placeholder_text="Telefon (5xxxxxxxxx)")
+tel_entry = ctk.CTkEntry(app, placeholder_text="Telefon (10 haneli)")
 tel_entry.pack(pady=10)
 
 mail_entry = ctk.CTkEntry(app, placeholder_text="Mail (opsiyonel)")
 mail_entry.pack(pady=10)
 
-adet_entry = ctk.CTkEntry(app, placeholder_text="SMS Adedi (boş = sonsuz)")
-adet_entry.pack(pady=10)
-
-aralik_entry = ctk.CTkEntry(app, placeholder_text="Gönderim Aralığı (sn)")
-aralik_entry.pack(pady=10)
-
-# ---------- LOG ----------
 log_box = ctk.CTkTextbox(app, width=360, height=140)
 log_box.pack(pady=10)
 
@@ -102,77 +129,29 @@ def log(msg):
     log_box.insert("end", msg + "\n")
     log_box.see("end")
 
-# ---------- MOCK SMS ----------
-def fake_sms_send():
-    log("📨 SMS gönderildi (TEST)")
-
-# ---------- NORMAL MOD ----------
-def normal_sms():
-    tel = tel_entry.get()
-    if len(tel) != 10 or not tel.isdigit():
-        messagebox.showerror("Hata", "Telefon numarası hatalı")
-        return
-
-    try:
-        aralik = int(aralik_entry.get())
-    except:
-        messagebox.showerror("Hata", "Aralık sayısal olmalı")
-        return
-
-    adet = adet_entry.get()
-    adet = int(adet) if adet.isdigit() else None
-
-    def run():
-        sayac = 0
-        while adet is None or sayac < adet:
-            fake_sms_send()
-            sayac += 1
-            time.sleep(aralik)
-
-    threading.Thread(target=run, daemon=True).start()
-
-# ---------- TURBO MOD ----------
 def TurboSMS():
-    tel_no = tel_entry.get().strip()
-    mail = mail_entry.get().strip()
-
-    if not tel_no.isdigit() or len(tel_no) != 10:
-        log("Telefon numarası hatalı!")
+    tel = tel_entry.get().strip()
+    if not tel.isdigit() or len(tel) != 10:
+        log("Telefon hatalı")
         return
 
-    log("⚡ Turbo SMS başlatıldı")
-    log("🥀 Esesdi SMS!")
+    log("⚡ Turbo SMS başladı")
+    send_sms = SendSms(tel, mail_entry.get().strip())
 
-    send_sms = SendSms(tel_no, mail)
-    dur = threading.Event()
     def run():
-        while not dur.is_set():
-            threads = []
-            for fonk in servisler_sms:
-                t = threading.Thread(
-                    target=getattr(send_sms, fonk),
+        while True:
+            for fn in servisler_sms:
+                threading.Thread(
+                    target=getattr(send_sms, fn),
                     daemon=True
-                )
-                threads.append(t)
-                t.start()
-
-            for t in threads:
-                t.join()
-
-            time.sleep(0.5)  # GUI'yi boğmamak için
+                ).start()
+            time.sleep(0.5)
 
     threading.Thread(target=run, daemon=True).start()
 
+ctk.CTkButton(app, text="SMS Gönder (Turbo)", command=TurboSMS).pack(pady=8)
+ctk.CTkButton(app, text="Çıkış", fg_color="red", command=app.destroy).pack(pady=15)
 
-# ---------- BUTONLAR ----------
-btn_normal = ctk.CTkButton(app, text="SMS Gönder (Normal)", command=normal_sms)
-btn_normal.pack(pady=8)
-
-btn_turbo = ctk.CTkButton(app, text="SMS Gönder (Turbo)", command=TurboSMS)
-btn_turbo.pack(pady=8)
-
-btn_exit = ctk.CTkButton(app, text="Çıkış", fg_color="red", command=app.destroy)
-btn_exit.pack(pady=15)
-
+# ================= BAŞLAT =================
 license_window()
 app.mainloop()
