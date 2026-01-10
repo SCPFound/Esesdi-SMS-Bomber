@@ -3,8 +3,48 @@ import time
 import threading
 import requests
 import hashlib
+import os
+import sys
 from sms import SendSms
 from tkinter import messagebox
+
+# ======== GÜNCELLEME AYAR ========
+LOCAL_VERSION = "1.0.1"
+
+VERSION_URL = "https://raw.githubusercontent.com/SCPFound/Esesdi-SMS-Bomber/main/version.txt"
+UPDATE_URL  = "https://raw.githubusercontent.com/SCPFound/Esesdi-SMS-Bomber/main/Esesdi.py"
+
+def check_update():
+    try:
+        r = requests.get(VERSION_URL, timeout=5)
+        r.raise_for_status()
+        online = r.text.strip()
+
+        if online != LOCAL_VERSION:
+            if messagebox.askyesno(
+                "Güncelleme Var",
+                f"Yeni sürüm bulundu ({online})\nGüncellemek ister misin?"
+            ):
+                download_update()
+    except:
+        pass
+
+def download_update():
+    try:
+        r = requests.get(UPDATE_URL, timeout=10)
+        r.raise_for_status()
+
+        new_file = sys.argv[0] + ".new"
+        with open(new_file, "wb") as f:
+            f.write(r.content)
+
+        os.replace(new_file, sys.argv[0])
+        messagebox.showinfo("Güncellendi", "Program güncellendi, yeniden başlatılıyor")
+        os.execv(sys.executable, ["python"] + sys.argv)
+
+    except Exception as e:
+        messagebox.showerror("Hata", f"Güncelleme başarısız:\n{e}")
+
 
 # ================= LİSANS =================
 PASTEBIN_RAW_URL = "https://pastebin.com/raw/pZLSpNpu"
