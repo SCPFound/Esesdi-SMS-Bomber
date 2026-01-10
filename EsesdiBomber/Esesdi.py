@@ -9,10 +9,10 @@ from sms import SendSms
 from tkinter import messagebox
 
 # ======== GÜNCELLEME AYAR ========
-LOCAL_VERSION = "1.0.1"
+LOCAL_VERSION = "1.0.2"
 
-VERSION_URL = "https://raw.githubusercontent.com/SCPFound/Esesdi-SMS-Bomber/main/version.txt"
-UPDATE_URL  = "https://raw.githubusercontent.com/SCPFound/Esesdi-SMS-Bomber/main/Esesdi.py"
+VERSION_URL = "https://raw.githubusercontent.com/SCPFound/Esesdi-SMS-Bomber/refs/heads/main/EsesdiBomber/version.txt"
+UPDATE_URL  = "https://raw.githubusercontent.com/SCPFound/Esesdi-SMS-Bomber/refs/heads/main/EsesdiBomber/Esesdi.py"
 
 def check_update():
     try:
@@ -135,6 +135,8 @@ mail_entry.pack(pady=10)
 log_box = ctk.CTkTextbox(app, width=360, height=140)
 log_box.pack(pady=10)
 
+check_update()
+
 def log(msg):
     log_box.insert("end", msg + "\n")
     log_box.see("end")
@@ -163,5 +165,6 @@ ctk.CTkButton(app, text="SMS Gönder (Turbo)", command=TurboSMS).pack(pady=8)
 ctk.CTkButton(app, text="Çıkış", fg_color="red", command=app.destroy).pack(pady=15)
 
 # ================= BAŞLAT =================
+check_update()
 license_window()
 app.mainloop()
