@@ -9,7 +9,7 @@ from sms import SendSms
 from tkinter import messagebox
 
 # ======== GÜNCELLEME AYAR ========
-LOCAL_VERSION = "1.0.2"
+LOCAL_VERSION = "1.0.0"
 
 VERSION_URL = "https://raw.githubusercontent.com/SCPFound/Esesdi-SMS-Bomber/refs/heads/main/EsesdiBomber/version.txt"
 UPDATE_URL  = "https://raw.githubusercontent.com/SCPFound/Esesdi-SMS-Bomber/refs/heads/main/EsesdiBomber/Esesdi.py"
