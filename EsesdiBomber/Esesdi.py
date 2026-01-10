@@ -6,6 +6,8 @@ import hashlib
 from sms import SendSms
 from tkinter import messagebox
 
+current_theme = "dark"
+
 # ================= LİSANS =================
 PASTEBIN_RAW_URL = "https://pastebin.com/raw/pZLSpNpu"
 
@@ -66,6 +68,7 @@ def license_window():
     lic.mainloop()
 
 # ================= PANEL =================
+
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
@@ -95,6 +98,17 @@ mail_entry.pack(pady=10)
 log_box = ctk.CTkTextbox(app, width=360, height=140)
 log_box.pack(pady=10)
 
+def hover_in(btn):
+    btn.configure(width=220, height=38)
+
+def hover_out(btn):
+    btn.configure(width=200, height=32)
+
+def click_anim(btn):
+    btn.configure(width=180)
+    btn.after(80, lambda: btn.configure(width=200))
+
+
 def log(msg):
     log_box.insert("end", msg + "\n")
     log_box.see("end")
@@ -119,8 +133,32 @@ def TurboSMS():
 
     threading.Thread(target=run, daemon=True).start()
 
-ctk.CTkButton(app, text="SMS Gönder (Turbo)", command=TurboSMS).pack(pady=8)
-ctk.CTkButton(app, text="Çıkış", fg_color="red", command=app.destroy).pack(pady=15)
+sms_btn = ctk.CTkButton(
+    app,
+    text="🚀 SMS Gönder (Turbo)",
+    width=200,
+    height=32,
+    command=lambda: (click_anim(sms_btn), TurboSMS())
+)
+
+sms_btn.pack(pady=8)
+
+sms_btn.bind("<Enter>", lambda e: hover_in(sms_btn))
+sms_btn.bind("<Leave>", lambda e: hover_out(sms_btn))
+
+exit_btn = ctk.CTkButton(
+    app,
+    text="Çıkış",
+    fg_color="red",
+    width=200,
+    height=32,
+    command=app.destroy
+)
+exit_btn.pack(pady=15)
+
+exit_btn.bind("<Enter>", lambda e: hover_in(exit_btn))
+exit_btn.bind("<Leave>", lambda e: hover_out(exit_btn))
+
 
 # ================= BAŞLAT =================
 license_window()
