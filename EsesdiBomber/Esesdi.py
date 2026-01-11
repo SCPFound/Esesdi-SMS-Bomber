@@ -6,8 +6,6 @@ import hashlib
 from sms import SendSms
 from tkinter import messagebox
 
-current_theme = "dark"
-
 # ================= LİSANS =================
 PASTEBIN_RAW_URL = "https://pastebin.com/raw/pZLSpNpu"
 
@@ -42,7 +40,7 @@ def license_window():
 
     entry = ctk.CTkEntry(
         lic,
-        placeholder_text="XXXX-XXXX-XXXX",
+        placeholder_text="Lisans...",
         width=240
     )
     entry.pack(pady=10)
@@ -61,7 +59,7 @@ def license_window():
 
     ctk.CTkButton(
         lic,
-        text="DOĞRULA",
+        text="Doğrula",
         command=submit
     ).pack(pady=20)
 
@@ -85,11 +83,11 @@ servisler_sms = [
 
 ctk.CTkLabel(
     app,
-    text="DIRECTED BY ESESDI!",
+    text="MARKED BY ESESDI!",
     font=("Arial", 22, "bold")
 ).pack(pady=15)
 
-tel_entry = ctk.CTkEntry(app, placeholder_text="Telefon (10 haneli)")
+tel_entry = ctk.CTkEntry(app, placeholder_text="Telefon (+90 EKLEME)")
 tel_entry.pack(pady=10)
 
 mail_entry = ctk.CTkEntry(app, placeholder_text="Mail (opsiyonel)")
