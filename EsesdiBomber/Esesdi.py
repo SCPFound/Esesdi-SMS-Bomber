@@ -7,23 +7,28 @@ from sms import SendSms
 from tkinter import messagebox
 
 # ================= LİSANS =================
-PASTEBIN_RAW_URL = "https://pastebin.com/raw/pZLSpNpu"
+GITHUB_RAW_URL = "https://raw.githubusercontent.com/SCPFound/Key-System/main/licenses.txt"
 
 def sha256(text):
-    return hashlib.sha256(text.encode()).hexdigest()
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 def check_license_online(user_key):
     try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        r = requests.get(PASTEBIN_RAW_URL, headers=headers, timeout=10)
+        r = requests.get(
+            GITHUB_RAW_URL,
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=10
+        )
         r.raise_for_status()
 
-        valid_hashes = [x.strip() for x in r.text.splitlines() if x.strip()]
-        return sha256(user_key) in valid_hashes
+        hashes = r.text.strip().splitlines()
+        return sha256(user_key) in hashes
 
-    except:
-        messagebox.showerror("Hata", "Lisans sunucusuna bağlanılamadı!")
+    except Exception as e:
+        print("Lisans Hatası:", e)
         return False
+
+
 
 
 def license_window():
